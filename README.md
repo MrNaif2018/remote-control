@@ -2,7 +2,7 @@
 
 ```bash
 sudo apt update
-sudo apt install ccache libopencv-dev python3-opencv cmake git libx11-dev libxfixes-dev libgl-dev libxext-dev
+sudo apt install ccache libopencv-dev python3-opencv cmake git libx11-dev libxfixes-dev libgl-dev libxext-dev xdotool
 git clone https://github.com/ultravideo/uvgRTP
 cd uvgRTP
 mkdir build && cd build
