@@ -26,6 +26,8 @@ using namespace cv;
 #include "mainwindow.h"
 #include "startwindow.h"
 #include "settingswindow.h"
+#include "grabber.h"
+#include "inputapplicant.h"
 
 constexpr int RECEIVER_WAIT_TIME_MS = 10 * 1000;
 
@@ -133,7 +135,10 @@ private:
     MainWindow *window;
     StartWindow &startWindow;
     SettingsWindow *settingsWindow;
+    GrabberSender *grabber;
+    X11InputApplicant *inputApplicant;
     std::string ConnectServer;
+    bool is_control;
 
 public:
     SessionManager(StartWindow &startWindow) : startWindow(startWindow)
@@ -157,8 +162,14 @@ public:
         int pack_size = settings.value("pack_size", PACK_SIZE).toInt();
         int frame_interval = (1000 / settings.value("fps", FPS).toInt());
         int quality = settings.value("quality", ENCODE_QUALITY).toInt();
-        recorder = new ScreenRecorder((char *)ConnectServer.c_str(), pack_size, frame_interval, quality);
-        recorder->start();
+        if (!is_control)
+        {
+            inputApplicant = new X11InputApplicant();
+            inputApplicant->start();
+            recorder = new ScreenRecorder((char *)ConnectServer.c_str(), pack_size, frame_interval, quality);
+            recorder->start();
+            QObject::connect(QApplication::instance(), SIGNAL(aboutToQuit()), recorder, SLOT(terminateThread()));
+        }
         window = new MainWindow();
         window->setFixedSize(window->width(), window->height());
         QObject::connect(window->endButton, &QPushButton::clicked, [&](bool)
@@ -166,24 +177,42 @@ public:
             stop();
             startWindow.show(); });
         window->init_audio_input((char *)ConnectServer.c_str());
+        window->prepareScene(is_control);
         window->show();
-        listen_thread = new MyThread();
-        QObject::connect(listen_thread, SIGNAL(signalGUI(const QImage &)), window, SLOT(processImage(const QImage &)));
-        QObject::connect(listen_thread, &QThread::finished, window, &MainWindow::beforeStopAll);
-        QObject::connect(window, &MainWindow::stopAll, [&]()
-                         { stop();
+        if (is_control)
+        {
+            grabber = new GrabberSender();
+            grabber->set_host(ConnectServer);
+            grabber->start();
+            listen_thread = new MyThread();
+            QObject::connect(listen_thread, SIGNAL(signalGUI(const QImage &)), window, SLOT(processImage(const QImage &)));
+            QObject::connect(listen_thread, &QThread::finished, window, &MainWindow::beforeStopAll);
+            QObject::connect(window, &MainWindow::stopAll, [&]()
+                             { stop();
             startWindow.show(); });
-        listen_thread->start();
-        QObject::connect(QApplication::instance(), SIGNAL(aboutToQuit()), listen_thread, SLOT(terminateThread()));
-        QObject::connect(QApplication::instance(), SIGNAL(aboutToQuit()), recorder, SLOT(terminateThread()));
+            listen_thread->start();
+            QObject::connect(QApplication::instance(), SIGNAL(aboutToQuit()), listen_thread, SLOT(terminateThread()));
+        }
     }
     void stop()
     {
-        listen_thread->terminateThread();
-        recorder->terminateThread();
+        if (is_control)
+        {
+            listen_thread->terminateThread();
+            listen_thread->deleteLater();
+            grabber->stop();
+            delete grabber;
+            grabber = nullptr;
+        }
+        else
+        {
+            recorder->terminateThread();
+            recorder->deleteLater();
+            inputApplicant->stop();
+            delete inputApplicant;
+            inputApplicant = nullptr;
+        }
         window->deinit_audio_input();
-        listen_thread->deleteLater();
-        recorder->deleteLater();
         player->deleteLater();
         window->deleteLater();
     }
@@ -196,6 +225,7 @@ public:
             return;
         }
         ConnectServer = ip.toLocal8Bit().data();
+        is_control = startWindow.controlCheckbox->isChecked();
         start();
     }
 };

@@ -1,9 +1,10 @@
 #ifndef STARTWINDOW_H
 #define STARTWINDOW_H
-#include <QWidget>
+
 #include <QtCore/QVariant>
 #include <QtGui/QIcon>
 #include <QtWidgets/QApplication>
+#include <QtWidgets/QCheckBox>
 #include <QtWidgets/QLabel>
 #include <QtWidgets/QLineEdit>
 #include <QtWidgets/QPushButton>
@@ -17,6 +18,7 @@ public:
     QLineEdit *ipLabel;
     QPushButton *connectButton;
     QPushButton *settingsButton;
+    QCheckBox *controlCheckbox;
 
     void setupUi(QWidget *StartWindow)
     {
@@ -41,11 +43,11 @@ public:
         label_2->setAlignment(Qt::AlignCenter);
         ipLabel = new QLineEdit(StartWindow);
         ipLabel->setObjectName(QString::fromUtf8("ipLabel"));
-        ipLabel->setGeometry(QRect(520, 350, 231, 41));
+        ipLabel->setGeometry(QRect(520, 340, 231, 41));
         ipLabel->setAlignment(Qt::AlignCenter);
         connectButton = new QPushButton(StartWindow);
         connectButton->setObjectName(QString::fromUtf8("connectButton"));
-        connectButton->setGeometry(QRect(600, 420, 80, 23));
+        connectButton->setGeometry(QRect(600, 440, 80, 23));
         connectButton->setStyleSheet(QString::fromUtf8("background-color: rgb(87, 227, 137);"));
         settingsButton = new QPushButton(StartWindow);
         settingsButton->setObjectName(QString::fromUtf8("settingsButton"));
@@ -54,6 +56,9 @@ public:
         icon.addFile(QString::fromUtf8(":/config.png"), QSize(), QIcon::Normal, QIcon::Off);
         settingsButton->setIcon(icon);
         settingsButton->setIconSize(QSize(32, 32));
+        controlCheckbox = new QCheckBox(StartWindow);
+        controlCheckbox->setObjectName(QString::fromUtf8("controlCheckbox"));
+        controlCheckbox->setGeometry(QRect(570, 400, 141, 21));
 
         retranslateUi(StartWindow);
 
@@ -63,11 +68,12 @@ public:
     void retranslateUi(QWidget *StartWindow)
     {
         StartWindow->setWindowTitle(QCoreApplication::translate("StartWindow", "Video conferencing", nullptr));
-        label->setText(QCoreApplication::translate("StartWindow", "P2P Videoconferencing", nullptr));
+        label->setText(QCoreApplication::translate("StartWindow", "Remote control app", nullptr));
         label_2->setText(QCoreApplication::translate("StartWindow", "Connect to server:", nullptr));
         ipLabel->setPlaceholderText(QCoreApplication::translate("StartWindow", "IP address", nullptr));
         connectButton->setText(QCoreApplication::translate("StartWindow", "Connect", nullptr));
         settingsButton->setText(QString());
+        controlCheckbox->setText(QCoreApplication::translate("StartWindow", "Control another PC", nullptr));
     } // retranslateUi
 };
 

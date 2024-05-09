@@ -17,6 +17,7 @@
 #include <QtWidgets/QMainWindow>
 #include <QtWidgets/QPushButton>
 #include <QtWidgets/QWidget>
+#include <QtWidgets/QLabel>
 #include <QtWidgets/QGraphicsPixmapItem>
 
 QT_BEGIN_NAMESPACE
@@ -30,6 +31,7 @@ public:
     QGraphicsPixmapItem *pixmap;
     QPixmap imgpix;
     QFrame *frame;
+    QLabel *controlledLabel;
     QPushButton *micButton;
     QPushButton *endButton;
 
@@ -40,6 +42,15 @@ public:
         MainWindow->resize(1280, 720);
         centralwidget = new QWidget(MainWindow);
         centralwidget->setObjectName(QString::fromUtf8("centralwidget"));
+        controlledLabel = new QLabel(centralwidget);
+        controlledLabel->setObjectName(QString::fromUtf8("controlledLabel"));
+        controlledLabel->setGeometry(QRect(510, 10, 241, 101));
+        QFont font;
+        font.setPointSize(15);
+        font.setBold(true);
+        controlledLabel->setFont(font);
+        controlledLabel->setTextFormat(Qt::AutoText);
+        controlledLabel->setAlignment(Qt::AlignCenter);
         graphicsScene = new QGraphicsScene;
         pixmap = new QGraphicsPixmapItem;
         graphicsScene->addItem(pixmap);
@@ -83,6 +94,20 @@ namespace Ui
 {
     class MainWindow : public Ui_MainWindow
     {
+    public:
+        void prepareScene(bool is_control)
+        {
+            if (is_control)
+            {
+                controlledLabel->hide();
+                graphicsView->show();
+            }
+            else
+            {
+                controlledLabel->show();
+                graphicsView->hide();
+            }
+        }
     };
 } // namespace Ui
 

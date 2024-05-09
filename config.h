@@ -9,6 +9,8 @@
 
 #define IMAGE_UDP_PORT 50000
 #define AUDIO_UDP_PORT 55455
+#define IO_TCP_PORT 50001
+#define MOUSEMOVE_DELAY_NS 10000000
 
 #define SETTINGS_FILE "config.ini"
 #endif
