@@ -84,7 +84,7 @@ public:
 
     void retranslateUi(QMainWindow *MainWindow)
     {
-        MainWindow->setWindowTitle(QCoreApplication::translate("MainWindow", "Video conferencing", nullptr));
+        MainWindow->setWindowTitle(QCoreApplication::translate("MainWindow", "Remote control", nullptr));
         micButton->setText(QString());
         endButton->setText(QCoreApplication::translate("MainWindow", "End", nullptr));
     } // retranslateUi

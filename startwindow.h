@@ -67,7 +67,7 @@ public:
 
     void retranslateUi(QWidget *StartWindow)
     {
-        StartWindow->setWindowTitle(QCoreApplication::translate("StartWindow", "Video conferencing", nullptr));
+        StartWindow->setWindowTitle(QCoreApplication::translate("StartWindow", "Remote control", nullptr));
         label->setText(QCoreApplication::translate("StartWindow", "Remote control app", nullptr));
         label_2->setText(QCoreApplication::translate("StartWindow", "Connect to server:", nullptr));
         ipLabel->setPlaceholderText(QCoreApplication::translate("StartWindow", "IP address", nullptr));
