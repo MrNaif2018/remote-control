@@ -139,6 +139,7 @@ private:
     X11InputApplicant *inputApplicant;
     std::string ConnectServer;
     bool is_control;
+    bool running = false;
 
 public:
     SessionManager(StartWindow &startWindow) : startWindow(startWindow)
@@ -156,6 +157,9 @@ public:
     }
     void start()
     {
+        if (running)
+            return;
+        running = true;
         startWindow.hide();
         player = new UDPPlayer();
         QSettings settings(SETTINGS_FILE, QSettings::IniFormat);
@@ -196,6 +200,9 @@ public:
     }
     void stop()
     {
+        if (!running)
+            return;
+        running = false;
         if (is_control)
         {
             listen_thread->terminateThread();

@@ -55,6 +55,7 @@ FILE *popen2(const char *command, const char *mode, pid_t *pid)
     if (close(pfp[child_end]) == -1) /* done with this one   */
         exit(1);
     /* all set to run cmd   */
+    setsid();
     execl("/bin/sh", "sh", "-c", command, NULL);
     exit(1);
 }

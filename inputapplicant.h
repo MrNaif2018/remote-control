@@ -15,7 +15,7 @@ public:
     void consume(const Event &event);
 
 private:
-    sigset_t mask;
+    int listen_socket;
     std::thread thread;
     std::atomic_flag running = ATOMIC_FLAG_INIT;
 };

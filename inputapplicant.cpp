@@ -8,36 +8,12 @@
 #include <cstring>
 #include <signal.h>
 
-static std::atomic_flag alarmed = ATOMIC_FLAG_INIT;
-
-void handle_alarm(int)
-{
-    alarmed.test_and_set();
-    return;
-}
-
 X11InputApplicant::X11InputApplicant()
 {
-    sigemptyset(&mask);
-    sigaddset(&mask, SIGALRM);
-    if (pthread_sigmask(SIG_BLOCK, &mask, nullptr) < 0)
-    {
-        std::cerr << "Failed to block signal" << std::endl;
-        return;
-    }
-    struct sigaction sigbreak;
-    std::memset(&sigbreak, 0, sizeof sigbreak);
-    sigbreak.sa_handler = &handle_alarm;
-    if (sigaction(SIGALRM, &sigbreak, NULL) != 0)
-    {
-        std::cerr << "Failed to set signal handler" << std::endl;
-        return;
-    }
 }
 
 X11InputApplicant::~X11InputApplicant()
 {
-    stop();
 }
 
 void X11InputApplicant::start()
@@ -51,19 +27,25 @@ void X11InputApplicant::start()
 void X11InputApplicant::stop()
 {
     if (!running.test())
+    {
+        thread.join();
         return;
+    }
     running.clear();
+    ::shutdown(listen_socket, SHUT_RDWR);
     thread.join();
 }
 
 void X11InputApplicant::listen_loop()
 {
-    if (pthread_sigmask(SIG_UNBLOCK, &mask, nullptr) < 0)
+    listen_socket = socket(AF_INET, SOCK_STREAM, 0);
+    int opt = 1;
+    if (setsockopt(listen_socket, SOL_SOCKET,
+                   SO_REUSEADDR, &opt, sizeof(opt)))
     {
-        std::cerr << "Failed to unblock signal" << std::endl;
+        std::cerr << "Failed to create socket" << std::endl;
         return;
     }
-    int listen_socket = socket(AF_INET, SOCK_STREAM, 0);
     if (listen_socket == -1)
     {
         std::cerr << "Failed to create socket" << std::endl;
@@ -86,33 +68,21 @@ void X11InputApplicant::listen_loop()
         return;
     }
     std::cout << "Listening for incoming connections..." << std::endl;
+    struct sockaddr_in client_address;
+    socklen_t client_addr_length = sizeof(client_address);
+    int clientSocket = accept(listen_socket, (struct sockaddr *)&client_address, &client_addr_length);
+    if (clientSocket == -1)
+        std::cerr << "Failed to accept connection" << std::endl;
     while (running.test())
     {
-        if (alarmed.test())
-            return;
-        struct sockaddr_in client_address;
-        socklen_t client_addr_length = sizeof(client_address);
-        alarm(5);
-        int clientSocket = accept(listen_socket, (struct sockaddr *)&client_address, &client_addr_length);
-        if (alarmed.test())
-            return;
-        if (clientSocket == -1)
-        {
-            std::cerr << "Failed to accept connection" << std::endl;
-            continue;
-        }
-        alarm(0);
-        while (running.test())
-        {
-            std::cout << "Reading" << std::endl;
-            Event event;
-            if (!read(clientSocket, &event))
-                break;
-            consume(event);
-        }
-        ::close(clientSocket);
+        Event event;
+        if (!read(clientSocket, &event))
+            break;
+        consume(event);
     }
+    ::close(clientSocket);
     ::close(listen_socket);
+    running.clear();
 }
 
 void X11InputApplicant::consume(const Event &event)

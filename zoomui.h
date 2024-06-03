@@ -31,9 +31,9 @@ public:
     QGraphicsPixmapItem *pixmap;
     QPixmap imgpix;
     QFrame *frame;
-    QLabel *controlledLabel;
     QPushButton *micButton;
     QPushButton *endButton;
+    QPixmap watchImage;
 
     void setupUi(QMainWindow *MainWindow)
     {
@@ -42,15 +42,6 @@ public:
         MainWindow->resize(1280, 720);
         centralwidget = new QWidget(MainWindow);
         centralwidget->setObjectName(QString::fromUtf8("centralwidget"));
-        controlledLabel = new QLabel(centralwidget);
-        controlledLabel->setObjectName(QString::fromUtf8("controlledLabel"));
-        controlledLabel->setGeometry(QRect(510, 10, 241, 101));
-        QFont font;
-        font.setPointSize(15);
-        font.setBold(true);
-        controlledLabel->setFont(font);
-        controlledLabel->setTextFormat(Qt::AutoText);
-        controlledLabel->setAlignment(Qt::AlignCenter);
         graphicsScene = new QGraphicsScene;
         pixmap = new QGraphicsPixmapItem;
         graphicsScene->addItem(pixmap);
@@ -76,7 +67,7 @@ public:
         endButton->setStyleSheet(QString::fromUtf8("background-color: red;\n"
                                                    "color: rgb(255, 255, 255);"));
         MainWindow->setCentralWidget(centralwidget);
-
+        watchImage = QPixmap::fromImage(QImage(":/control.png"));
         retranslateUi(MainWindow);
 
         QMetaObject::connectSlotsByName(MainWindow);
@@ -97,16 +88,8 @@ namespace Ui
     public:
         void prepareScene(bool is_control)
         {
-            if (is_control)
-            {
-                controlledLabel->hide();
-                graphicsView->show();
-            }
-            else
-            {
-                controlledLabel->show();
-                graphicsView->hide();
-            }
+            if (!is_control)
+                pixmap->setPixmap(watchImage);
         }
     };
 } // namespace Ui

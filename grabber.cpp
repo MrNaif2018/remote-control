@@ -129,7 +129,7 @@ void X11Grabber::loop()
             }
         }
     }
-    kill(child_pid, SIGTERM);
+    killpg(getpgid(child_pid), SIGKILL);
     pclose(input);
 }
 
@@ -171,6 +171,8 @@ void GrabberSender::start()
 void GrabberSender::stop()
 {
     X11Grabber::stop();
+    char buf[2] = {0};
+    ::send(socket, buf, sizeof(buf), 0); // termination command
     ::close(socket);
 }
 

@@ -3,5 +3,6 @@
     <file alias="mic-off.png">images/mic-off.png</file>
     <file alias="mic-on.png">images/mic-on.png</file>
     <file alias="config.png">images/config.png</file>
+    <file alias="control.png">images/control.png</file>
 </qresource>
 </RCC>
