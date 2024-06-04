@@ -33,12 +33,13 @@ for root, dirs, files in os.walk(lab_path):
                 title_para.paragraph_format.space_after = Pt(0)
                 title_para.paragraph_format.first_line_indent = Cm(1.25)
                 for line in f.read().rstrip().split("\n"):
-                    para = doc.add_paragraph()
-                    para_run = para.add_run(line)
-                    para_run.font.size = Pt(10)
-                    para_run.font.name = "Courier New"
-                    para.paragraph_format.line_spacing = 1
-                    para.paragraph_format.space_after = Pt(0)
-                    para.paragraph_format.first_line_indent = Cm(1.25)
+                    if line.strip():
+                        para = doc.add_paragraph()
+                        para_run = para.add_run(line)
+                        para_run.font.size = Pt(10)
+                        para_run.font.name = "Courier New"
+                        para.paragraph_format.line_spacing = 1
+                        para.paragraph_format.space_after = Pt(0)
+                        para.paragraph_format.first_line_indent = Cm(1.25)
                 first = False
 doc.save("code.docx")
